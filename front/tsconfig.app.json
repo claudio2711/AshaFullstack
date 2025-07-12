@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "composite": false,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "lib": ["ESNext", "DOM"],
+    "jsx": "react-jsx",
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@/*":            ["src/*"],
+      "@/components/*": ["src/components/*"],
+      "@/common/*":     ["src/components/common/*"],
+      "@/layout/*":     ["src/components/layout/*"],
+      "@/pages/*":      ["src/components/pages/*"],
+      "@/hooks/*":      ["src/hooks/*"],
+      "@/features/*":   ["src/features/*"],
+      "@/data/*":       ["src/data/*"],
+      "@/assets/*":     ["src/assets/*"],
+      "@/types/*":      ["src/types/*"]
+    }
+  },
+  "include": ["src"]
+}
