@@ -2,7 +2,7 @@ import express from "express"
 import cors from "cors"
 import "dotenv/config"
 import songRouter from "./src/routes/songRoute";
-import connectDB from "./src/config/mongoDB";
+import connectDB from "./src/config/mongodb";
 import connetcCloudinary from "./src/config/cloudinary";
 
 
