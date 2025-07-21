@@ -1,5 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 // src/hooks/PlayerContext.tsx
-// eslint-disable-next-line react-refresh/only-export-components
+
 import React, {
   createContext,
   useContext,
