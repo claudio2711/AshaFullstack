@@ -1,4 +1,4 @@
-// src/models/songModel.ts
+
 import { Schema, model, InferSchemaType } from "mongoose";
 
 const songSchema = new Schema({
@@ -10,7 +10,7 @@ const songSchema = new Schema({
   duration: { type: String, required: true }
 });
 
-// --> tipo derivato automaticamente dallo schema
+
 export type SongDoc = InferSchemaType<typeof songSchema>;
 
 export default model<SongDoc>("Song", songSchema);
