@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="ashavanGrad" x1="0" y1="0" x2="200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#060B23"/>
+      <stop offset="35%"  stop-color="#0D1B3A"/>
+      <stop offset="55%"  stop-color="#1A2149"/>
+      <stop offset="80%"  stop-color="#462060"/>
+      <stop offset="100%" stop-color="#FF6F61"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ring -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="url(#ashavanGrad)" stroke-width="20"/>
+
+  <!-- Letter A -->
+  <text x="100" y="113" text-anchor="middle" font-family="sans-serif" font-size="100" font-weight="700"
+        fill="#060B23" dominant-baseline="middle">A</text>
+</svg>
