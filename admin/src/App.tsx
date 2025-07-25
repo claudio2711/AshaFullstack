@@ -19,6 +19,8 @@ const DEFAULT_GRADIENT =
   ')';
 
 
+export const url = "http://localhost:4000"
+
 export const App = () => {
   return (
     <div className = "flex items-start min-h-screen">
