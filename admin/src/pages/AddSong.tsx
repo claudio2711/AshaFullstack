@@ -1,13 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/pages/AddSong.tsx
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";             // <-- non dimenticare l’import
+import { toast } from "react-toastify";             
 import { assets } from "../assets/assets";
 import { url } from "../App";
 
-/* ------------------------------------------------------------------ */
-/* 1.  Tipi di stato                                                  */
-/* ------------------------------------------------------------------ */
+
 type NullableFile = File | null;
 
 const AddSong = () => {
@@ -20,9 +19,7 @@ const AddSong = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  /* ---------------------------------------------------------------- */
-  /* 2.  Handler                                                      */
-  /* ---------------------------------------------------------------- */
+
   const onSubmitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -57,13 +54,11 @@ const AddSong = () => {
     } catch (err) {
       toast.error("Errore di rete / server");
     } finally {
-      setLoading(false);       // ← viene eseguito anche se il try fallisce
+      setLoading(false);       
     }
   };
 
-  /* ---------------------------------------------------------------- */
-  /* 3.  Render                                                      */
-  /* ---------------------------------------------------------------- */
+
   if (loading) {
     return (
       <div className="grid place-items-center min-h-[80vh]">
@@ -77,9 +72,9 @@ const AddSong = () => {
       onSubmit={onSubmitHandler}
       className="flex flex-col items-start gap-8 text-gray-600"
     >
-      {/* upload */}
+      
       <div className="flex gap-8">
-        {/* audio */}
+        
         <div className="flex flex-col gap-4">
           <p>Upload song</p>
           <input
@@ -99,7 +94,7 @@ const AddSong = () => {
           </label>
         </div>
 
-        {/* image */}
+        {}
         <div className="flex flex-col gap-4">
           <p>Upload image</p>
           <input
@@ -120,7 +115,7 @@ const AddSong = () => {
         </div>
       </div>
 
-      {/* testo */}
+      {}
       <div className="flex flex-col gap-2.5">
         <p>Song name</p>
         <input
@@ -151,7 +146,7 @@ const AddSong = () => {
           className="bg-transparent border-2 border-indigo-500 p-2.5 w-40 outline-blue-900"
         >
           <option value="none">none</option>
-          {/* popola con i tuoi album se li carichi */}
+          {}
         </select>
       </div>
 

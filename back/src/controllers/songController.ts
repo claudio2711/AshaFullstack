@@ -101,21 +101,22 @@ export const listSong = async (_req: Request, res: Response) => {
     const songs = await SongModel.find().lean();
     return res.json({ success: true, tracce: songs });
     
-  } catch (error) 
+  } catch (err) 
   {
-    res.json({success: false});
+    console.error("listSong error:", err); 
+    return res.status(500).json({ success: false, message: (err as Error).message });
   }
   
 };
 
 
 export const removeSong = async (
-  req: Request<{ id: string }>,            // 🎯 id arriva da req.params
+  req: Request<{ id: string }>,            
   res: Response
 ) => {
   try 
   {
-    const { id } = req.params;             // ← adesso c’è sempre
+    const { id } = req.params;             
 
     const deleted = await songModel.findByIdAndDelete(id);
     if (!deleted) 

@@ -6,7 +6,7 @@ import upload from "../middleware/multer";
 
 const songRouter = express.Router();
 
-/* usa il metodo .fields dell’istanza Multer -------------------- */
+
 songRouter.post("/add",upload.fields([
     { name: "image", maxCount: 1 },
     { name: "audio", maxCount: 1 }  

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
- import { ToastContainer, toast } from "react-toastify";
- import { Routes, Route } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import { Routes, Route } from "react-router-dom";
 import AddSong from "./pages/AddSong";
 import AddAlbum from "./pages/AddAlbum";
 import ListSong from "./pages/ListSong";

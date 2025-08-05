@@ -16,7 +16,7 @@ interface MulterFiles {
 
 
 export const addAlbum = async (
-  req: Request & { file?: Express.Multer.File },   // <-- usa file
+  req: Request & { file?: Express.Multer.File }, 
   res: Response
 ) => {
   try {
