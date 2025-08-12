@@ -7,7 +7,9 @@ const songSchema = new Schema({
   album   : { type: String, required: true },
   image   : { type: String, required: true },
   file    : { type: String, required: true },
-  duration: { type: String, required: true }
+  duration: { type: String, required: true },
+  imagePublicId: { type: String, default: null },   // <—
+  audioPublicId: { type: String, default: null }
 });
 
 

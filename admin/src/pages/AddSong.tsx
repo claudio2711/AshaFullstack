@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // src/pages/AddSong.tsx
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";             
 import { assets } from "../assets/assets";
@@ -8,6 +8,8 @@ import { url } from "../App";
 
 
 type NullableFile = File | null;
+type Album = { _id: string; name: string };
+
 
 const AddSong = () => {
   const [image, setImage]     = useState<NullableFile>(null);
@@ -16,6 +18,7 @@ const AddSong = () => {
   const [name,  setName]      = useState<string>("");
   const [desc,  setDesc]      = useState<string>("");
   const [album, setAlbum]     = useState<string>("none");
+  const [albumData, setAlbumData] = useState<Album[]>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -58,16 +61,33 @@ const AddSong = () => {
     }
   };
 
+  const loadAlbumData = async ()=>
+    {
+      try {
+        
+      const response = await axios.get(`${url}/api/album/list`);
+        if(response.data.success)
+    {
+      setAlbumData(response.data.albums);
+    }else
+      {
+        toast.error("Non è stato possibile caricare nessun album");
+      }
+      } catch (error) {
+        toast.error("errore!");
+      }
+    }
 
-  if (loading) {
-    return (
-      <div className="grid place-items-center min-h-[80vh]">
+    useEffect(()=>
+      {
+        loadAlbumData();
+      }, [])
+
+  return loading? (
+    <div className="grid place-items-center min-h-[80vh]">
         <div className="w-16 h-16 border-4 border-gray-400 border-t-green-800 rounded-full animate-spin" />
       </div>
-    );
-  }
-
-  return (
+  ) : (
     <form
       onSubmit={onSubmitHandler}
       className="flex flex-col items-start gap-8 text-gray-600"
@@ -141,13 +161,17 @@ const AddSong = () => {
       <div className="flex flex-col gap-2.5">
         <p>Album</p>
         <select
-          value={album}
-          onChange={(e) => setAlbum(e.target.value)}
-          className="bg-transparent border-2 border-indigo-500 p-2.5 w-40 outline-blue-900"
-        >
-          <option value="none">none</option>
-          {}
-        </select>
+  value={album}
+  onChange={(e) => setAlbum(e.target.value)}
+  className="bg-transparent border-2 border-indigo-500 p-2.5 w-40 outline-blue-900"
+>
+  <option value="none">none</option>
+  {albumData.map((item) => (
+    <option key={item._id} value={item.name}>
+      {item.name}
+    </option>
+  ))}
+</select>
       </div>
 
       <button
