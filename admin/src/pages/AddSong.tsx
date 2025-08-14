@@ -167,7 +167,7 @@ const AddSong = () => {
 >
   <option value="none">none</option>
   {albumData.map((item) => (
-    <option key={item._id} value={item.name}>
+    <option key={item._id} value={item._id}>
       {item.name}
     </option>
   ))}

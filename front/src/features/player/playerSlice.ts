@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Song } from '@/types/music';
-import songs from '@/data/songs.json';
+//import songs from '@/data/songs.json';
 
 /** ───────── State ───────── */
 interface PlayerState {
