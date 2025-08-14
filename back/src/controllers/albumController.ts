@@ -1,119 +1,94 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { v2 as cloudinary } from "cloudinary";
-import AlbumModel, { AlbumDoc } from "../models/albumModel";
+import AlbumModel from "../models/albumModel";
 
-interface AddAlbumBody {
-  name: string;
-  desc: string;
-  bgColour: string;
-}
-
-// util: slug pulito per public_id di Cloudinary
+// util per avere public_id leggibile
 const albumSlug = (name: string) =>
-  name
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9 _-]/g, "") // rimuove caratteri non validi
-    .replace(/\s+/g, "_");
+  name.trim().toLowerCase().replace(/[^a-z0-9 _-]/g, "").replace(/\s+/g, "_");
 
-export const addAlbum = async (
-  req: Request & { file?: Express.Multer.File },
-  res: Response
-) => {
+// POST /api/album/add
+export const addAlbum = async (req: Request, res: Response) => {
   try {
-    const { name, desc, bgColour } = req.body as AddAlbumBody;
-    const imageFile = req.file;
+    const { name, desc, bgColour } = req.body as {
+      name?: string; desc?: string; bgColour?: string;
+    };
+    const file = (req.file as Express.Multer.File | undefined);
 
-    if (!imageFile) {
-      return res.status(400).json({ success: false, message: "cover mancante" });
+    if (!name || !desc || !bgColour || !file) {
+      return res.status(400).json({ success: false, message: "campi o file mancanti" });
     }
 
-    const already = await AlbumModel.findOne<AlbumDoc>({ name }).lean();
-    if (already) {
-      return res.status(409).json({ success: false, message: "album esistente" });
-    }
-
-    const imageUp = await cloudinary.uploader.upload(imageFile.path, {
-      resource_type: "image",
+    const up = await cloudinary.uploader.upload(file.path, {
+      folder: "covers",
       public_id: `albums/${albumSlug(name)}`,
-      use_filename: true,
-      unique_filename: false,
+      resource_type: "image",
       overwrite: true,
-      invalidate: true,
     });
 
-    const album = await AlbumModel.create({
-      name,
-      desc,
-      bgColour,
-      image: imageUp.secure_url,
-      imagePublicId: imageUp.public_id,
+    const doc = await AlbumModel.create({
+      name, desc, bgColour,
+      image: up.secure_url,
+      imagePublicId: up.public_id,
     });
 
-    return res.json({ success: true, message: "album creato", data: album });
-  } catch (err) {
-    console.error(err);
-    return res
-      .status(500)
-      .json({ success: false, message: (err as Error).message });
-  }
-};
-
-export const listAlbum = async (_req: Request, res: Response) => {
-  const albums = await AlbumModel.find().lean();
-  return res.json({ success: true, albums });
-};
-
-export const removeAlbum = async (
-  req: Request<{ id: string }>,
-  res: Response
-) => {
-  try {
-    const { id } = req.params;
-
-    const album = await AlbumModel.findById(id);
-    if (!album) {
-      return res
-        .status(404)
-        .json({ success: false, message: "album non trovato" });
-    }
-
-    if ((album as any).imagePublicId) {
-      await cloudinary.uploader.destroy((album as any).imagePublicId);
-    }
-
-    await album.deleteOne();
-    return res.json({ success: true, message: "album rimosso" });
+    return res.json({ success: true, data: doc });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "server error" });
   }
 };
 
-export const updateAlbumColour = async (
-  req: Request<{ id: string }, unknown, { bgColour: string }>,
-  res: Response
-) => {
+// GET /api/album/list
+export const listAlbum = async (_req: Request, res: Response) => {
+  try {
+    const albums = await AlbumModel.find({}).sort({ createdAt: -1, _id: -1 }).lean().exec();
+    return res.json({ success: true, albums });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "server error" });
+  }
+};
+
+// DELETE /api/album/remove/:id
+export const removeAlbum = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { bgColour } = req.body;
+    const album = await AlbumModel.findById(id);
+    if (!album) return res.status(404).json({ success: false, message: "album non trovato" });
+
+    if ((album as any).imagePublicId) {
+      await cloudinary.uploader.destroy((album as any).imagePublicId);
+    }
+    await album.deleteOne();
+
+    return res.json({ success: true, message: "album removed" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "server error" });
+  }
+};
+
+// PATCH /api/album/colour/:id
+export const updateAlbumColour = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { bgColour } = req.body as { bgColour?: string };
+    if (!bgColour) return res.status(400).json({ success: false, message: "bgColour mancante" });
 
     const updated = await AlbumModel.findByIdAndUpdate(
       id,
-      { bgColour },
+      { $set: { bgColour } },
       { new: true }
-    );
+    ).lean();
 
     if (!updated) {
-      return res
-        .status(404)
-        .json({ success: false, message: "album non trovato" });
+      return res.status(404).json({ success: false, message: "album non trovato" });
     }
-
     return res.json({ success: true, data: updated });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "server error" });
   }
 };
+
 

@@ -1,73 +1,59 @@
 // src/controllers/songController.ts
-// ----------------------------------------------------------------------
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { v2 as cloudinary } from "cloudinary";
 import SongModel from "../models/songModel";
 
-
-interface AddSongBody {
-  name: string;
-  desc: string;
-  album: string; 
-}
-
-interface MulterFiles {
-  image?: Express.Multer.File[];
-  audio?: Express.Multer.File[];
-}
-
-
-const formatDuration = (totalSeconds: number): string => {
-  const s = Math.max(0, Math.round(totalSeconds || 0));
+// util
+const toMMSS = (sec: number | undefined) => {
+  const s = Math.max(0, Math.floor(sec ?? 0));
   const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m}:${r.toString().padStart(2, "0")}`;
+  const r = (s % 60).toString().padStart(2, "0");
+  return `${m}:${r}`;
 };
 
 // POST /api/song/add
-export const addSong = async (req: Request<{}, {}, AddSongBody>, res: Response) => {
+export const addSong = async (req: Request, res: Response) => {
   try {
-    const { name, desc, album } = req.body || {};
-    const files = req.files as MulterFiles;
+    const { name, desc, album } = req.body as {
+      name?: string; desc?: string; album?: string;
+    };
+
+    const files = req.files as {
+      image?: Express.Multer.File[];
+      audio?: Express.Multer.File[];
+    };
 
     if (!name || !desc || !album) {
-      return res.status(400).json({ success: false, message: "campi obbligatori mancanti" });
+      return res.status(400).json({ success: false, message: "campi mancanti" });
     }
     if (!files?.image?.[0] || !files?.audio?.[0]) {
-      return res.status(400).json({ success: false, message: "file mancanti (image, audio)" });
+      return res.status(400).json({ success: false, message: "file mancanti" });
     }
 
-    
-    const imgUp = await cloudinary.uploader.upload(files.image[0].path, {
+    // upload cover
+    const upImg = await cloudinary.uploader.upload(files.image[0].path, {
       folder: "covers",
+      resource_type: "image",
     });
 
-    
-    const audioUp = await cloudinary.uploader.upload(files.audio[0].path, {
+    // upload audio (Cloudinary gestisce audio come 'video')
+    const upAud = await cloudinary.uploader.upload(files.audio[0].path, {
       folder: "songs",
       resource_type: "video",
     });
 
-    
-    const duration = formatDuration(Number(audioUp.duration || 0));
-
-    
-    const songDoc = await SongModel.create({
+    const doc = await SongModel.create({
       name,
       desc,
       album,
-      image: imgUp.secure_url,
-      file: audioUp.secure_url,
-      duration,
-      imagePublicId: imgUp.public_id,   
-      audioPublicId: audioUp.public_id,
+      image: upImg.secure_url,
+      file:  upAud.secure_url,
+      duration: toMMSS(upAud.duration as number | undefined),
+      imagePublicId: upImg.public_id,
+      audioPublicId: upAud.public_id,
     });
 
-    return res.json({
-      success: true,
-      message: "traccia aggiunta",
-      traccia: songDoc,
-    });
+    return res.json({ success: true, data: doc });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "server error" });
@@ -77,8 +63,20 @@ export const addSong = async (req: Request<{}, {}, AddSongBody>, res: Response) 
 // GET /api/song/list
 export const listSong = async (_req: Request, res: Response) => {
   try {
-    const songs = await SongModel.find({}).lean();
-    return res.json({ success: true, tracce: songs });
+    const docs = await SongModel.find({})
+      .sort({ createdAt: -1, _id: -1 })
+      .lean()
+      .exec();
+
+    // garantisci sempre createdAt (ISO) anche per record vecchi senza timestamps
+    const tracce = docs.map((d: any) => {
+      const cAt: Date | undefined = d.createdAt
+        ? new Date(d.createdAt)
+        : (typeof d._id?.getTimestamp === "function" ? d._id.getTimestamp() : undefined);
+      return { ...d, createdAt: cAt ? cAt.toISOString() : undefined };
+    });
+
+    return res.json({ success: true, tracce });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "server error" });
@@ -89,13 +87,12 @@ export const listSong = async (_req: Request, res: Response) => {
 export const removeSong = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-
     const song = await SongModel.findById(id);
     if (!song) {
-      return res.status(404).json({ success: false, message: "brano non trovato" });
+      return res.status(404).json({ success: false, message: "song non trovata" });
     }
 
-    
+    // rimuovi media su Cloudinary se presenti
     if ((song as any).imagePublicId) {
       await cloudinary.uploader.destroy((song as any).imagePublicId);
     }

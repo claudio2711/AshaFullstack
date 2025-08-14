@@ -1,14 +1,15 @@
 import { Schema, model, InferSchemaType } from "mongoose";
 
-
-const albumSchema = new Schema({
-  name    : { type: String, required: true },
-  desc    : { type: String, required: true },
-  bgColour: { type: String, required: true },
-  image   : { type: String, required: true },
-  imagePublicId: { type: String, default: null }
-});
+const albumSchema = new Schema(
+  {
+    name:          { type: String, required: true },
+    desc:          { type: String, required: true },
+    bgColour:      { type: String, required: true },
+    image:         { type: String, required: true },
+    imagePublicId: { type: String, default: null },
+  },
+  { timestamps: true } // opzionale, utile se vuoi createdAt anche sugli album
+);
 
 export type AlbumDoc = InferSchemaType<typeof albumSchema>;
-
 export default model<AlbumDoc>("Album", albumSchema);

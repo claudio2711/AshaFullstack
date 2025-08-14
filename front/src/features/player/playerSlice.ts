@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { Song } from '@/types/music';
+//import type { Song } from '@/types/music';
 //import songs from '@/data/songs.json';
 
 /** ───────── State ───────── */
@@ -40,10 +40,12 @@ const playerSlice = createSlice({
       if (state.currentId > 0) state.currentId -= 1;
       state.position = 0;
     },
-    next(state) {
-      if (state.currentId < (songs as Song[]).length - 1) state.currentId += 1;
-      state.position = 0;
-    },
+    next(state, a: PayloadAction<number | undefined>) {
+  const total = a.payload ?? state.currentId + 1;
+  state.currentId = Math.min(state.currentId + 1, Math.max(0, total - 1));
+  state.position = 0;
+}
+,
 
     /** aggiornamento barra di avanzamento */
     seek(state, a: PayloadAction<number>)      { state.position = a.payload; },

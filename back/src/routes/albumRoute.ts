@@ -12,8 +12,7 @@ const albumRouter = Router();
 albumRouter.post("/add", upload.single("image"), addAlbum);
 albumRouter.get("/list", listAlbum);
 albumRouter.delete("/remove/:id", removeAlbum);
-
-// nuovo: modifica colore direttamente dalla lista
 albumRouter.patch("/colour/:id", updateAlbumColour);
 
 export default albumRouter;
+
